@@ -1,7 +1,14 @@
 <script>
+  import { onMount } from 'svelte';
   import Counter from './Counter.svelte';
   import welcome from '$lib/images/svelte-welcome.webp';
   import welcome_fallback from '$lib/images/svelte-welcome.png';
+  import init, { greet } from '$lib/wasm/pkg';
+
+  onMount(async () => {
+    await init();
+    greet('World!');
+  })
 </script>
 
 <svelte:head>
