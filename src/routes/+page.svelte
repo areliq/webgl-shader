@@ -1,13 +1,33 @@
 <script>
   import { onMount } from 'svelte';
-  import Counter from './Counter.svelte';
-  import welcome from '$lib/images/svelte-welcome.webp';
-  import welcome_fallback from '$lib/images/svelte-welcome.png';
-  import init, { greet } from '$lib/wasm/pkg';
+  // import Counter from './Counter.svelte';
+  // import welcome from '$lib/images/svelte-welcome.webp';
+  // import welcome_fallback from '$lib/images/svelte-welcome.png';
+  import init, { render as renderWebGL } from '$lib/wasm/pkg';
+
+  const vertexShader = `
+  attribute vec4 aVertexPosition;
+  attribute vec4 aVertexColor;
+  uniform mat4 uModelViewMatrix;
+  uniform mat4 uProjectionMatrix;
+  varying lowp vec4 vColor;
+
+  void main() {
+    gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+    vColor = aVertexColor;
+  }`
+
+  const fragmentShader = `
+  varying lowp vec4 vColor;
+  void main() {
+    gl_FragColor = vColor;
+  }`
+
 
   onMount(async () => {
     await init();
-    greet('World!');
+  
+    renderWebGL(vertexShader, fragmentShader);
   })
 </script>
 
@@ -16,7 +36,7 @@
   <meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-<section>
+<!-- <section>
   <h1>
     <span class="welcome">
       <picture>
@@ -33,9 +53,11 @@
   </h2>
 
   <Counter />
-</section>
+</section> -->
 
-<style>
+<canvas id="canvas" width="640px" height="320px"></canvas>
+
+<!-- <style>
   section {
     display: flex;
     flex-direction: column;
@@ -63,4 +85,4 @@
     top: 0;
     display: block;
   }
-</style>
+</style> -->
