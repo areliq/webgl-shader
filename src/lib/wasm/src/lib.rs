@@ -1,10 +1,10 @@
 extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
-mod webgl;
 mod examples;
-use crate::webgl::get_context_by_id;
+mod webgl;
 use crate::examples::colored_square::main as draw_colored_square;
+use crate::webgl::get_context_by_id;
 
 #[wasm_bindgen]
 extern "C" {

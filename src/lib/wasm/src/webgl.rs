@@ -1,5 +1,7 @@
 use wasm_bindgen::JsCast;
-use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlShader, WebGlBuffer, WebGlUniformLocation};
+use web_sys::{
+    WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlShader, WebGlUniformLocation,
+};
 
 pub struct CanvasProperties {
     pub height: f32,
@@ -86,32 +88,32 @@ pub fn link_shader_program(
 }
 
 pub struct ShaderInfo<'a> {
-  pub program: &'a WebGlProgram,
-  pub canvas_width: f32,
-  pub canvas_height: f32,
-  pub vertex_position: u32,
-  pub vertex_color: u32,
-  pub program_projection_matrix: &'a WebGlUniformLocation,
-  pub program_model_view_matrix: &'a WebGlUniformLocation,
+    pub program: &'a WebGlProgram,
+    pub canvas_width: f32,
+    pub canvas_height: f32,
+    pub vertex_position: u32,
+    pub vertex_color: u32,
+    pub program_projection_matrix: &'a WebGlUniformLocation,
+    pub program_model_view_matrix: &'a WebGlUniformLocation,
 }
-
 
 pub fn draw(
     context: &WebGl2RenderingContext,
     info: &ShaderInfo,
-    position_buffer: &WebGlBuffer, 
+    position_buffer: &WebGlBuffer,
     color_buffer: &WebGlBuffer,
     vec_projection_matrix: &[f32],
     vec_model_view_matrix: &[f32],
 ) {
-    context.clear_color(0.0, 0.0, 0.0, 1.0);  // black, fully-opaque
-    context.clear_depth(1.0); 
+    context.clear_color(0.0, 0.0, 0.0, 1.0); // black, fully-opaque
+    context.clear_depth(1.0);
     context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
     context.enable(WebGl2RenderingContext::DEPTH_TEST);
     context.depth_func(WebGl2RenderingContext::LEQUAL);
 
-    context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT | WebGl2RenderingContext::DEPTH_BUFFER_BIT);
-    
+    context
+        .clear(WebGl2RenderingContext::COLOR_BUFFER_BIT | WebGl2RenderingContext::DEPTH_BUFFER_BIT);
+
     // Tell WebGL how to pull out the positions from the position
     // buffer into the VertexPosition attribute
     {
@@ -120,7 +122,7 @@ pub fn draw(
         let normalize = false;
         let stride = 0;
         let offset = 0;
-    
+
         context.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&position_buffer));
         context.vertex_attrib_pointer_with_i32(
             info.vertex_position,
@@ -130,7 +132,7 @@ pub fn draw(
             stride,
             offset,
         );
-    
+
         context.enable_vertex_attrib_array(info.vertex_position);
     }
 

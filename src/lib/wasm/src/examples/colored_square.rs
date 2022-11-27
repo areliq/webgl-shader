@@ -1,6 +1,6 @@
 use wasm_bindgen::JsValue;
 
-use crate::webgl::{compile_shader, link_shader_program, ShaderInfo, draw};
+use crate::webgl::{compile_shader, draw, link_shader_program, ShaderInfo};
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 extern crate nalgebra_glm as glm;
 
@@ -24,10 +24,10 @@ static FRAGMENT_SHADER_SOURCE: &'static str = r#"
 "#;
 
 pub fn main(
-    context: &WebGl2RenderingContext, 
+    context: &WebGl2RenderingContext,
     canvas_height: f32,
     canvas_width: f32,
- )  -> Result<(), JsValue> {
+) -> Result<(), JsValue> {
     let vertex_shader = compile_shader(
         &context,
         WebGl2RenderingContext::VERTEX_SHADER,
@@ -129,7 +129,6 @@ fn draw_colored_square(
     info: &ShaderInfo,
     (position_buffer, color_buffer): &(WebGlBuffer, WebGlBuffer),
 ) {
-
     let field_of_view = 45.0 * std::f32::consts::PI / 180.0;
     let aspect = info.canvas_width / info.canvas_height;
     let z_near = 0.1;
@@ -142,5 +141,12 @@ fn draw_colored_square(
         glm::translate(&glm::Mat4::identity(), &glm::TVec3::new(-0.0, 0.0, -6.0));
     let vec_model_view_matrix = model_view_matrix.iter().map(|v| *v).collect::<Vec<_>>();
 
-    draw(context, info, position_buffer, color_buffer, &vec_projection_matrix[..], &vec_model_view_matrix[..]);
+    draw(
+        context,
+        info,
+        position_buffer,
+        color_buffer,
+        &vec_projection_matrix[..],
+        &vec_model_view_matrix[..],
+    );
 }
