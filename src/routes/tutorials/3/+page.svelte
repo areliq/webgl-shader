@@ -33,5 +33,5 @@
   <meta name="description" content="WebGL Shader App" />
 </svelte:head>
   
-  <canvas id="canvas" width="640px" height="320px"></canvas>
+<canvas id="canvas" width="640px" height="320px"></canvas>
   

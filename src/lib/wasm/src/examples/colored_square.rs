@@ -1,8 +1,9 @@
 use wasm_bindgen::JsValue;
 
-use crate::webgl::{compile_shader, draw, link_shader_program, ShaderInfo};
-use web_sys::{WebGl2RenderingContext, WebGlBuffer};
+use web_sys::{WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlUniformLocation};
 extern crate nalgebra_glm as glm;
+
+use crate::webgl::{compile_shader, draw, link_shader_program, ShaderInfo};
 
 static VERTEX_SHADER_SOURCE: &'static str = r#"
   attribute vec4 aVertexPosition;
@@ -28,6 +29,35 @@ pub fn main(
     canvas_height: f32,
     canvas_width: f32,
 ) -> Result<(), JsValue> {
+    let buffers = init_buffers(&context);
+    let program = setup_shader_program(&context)?;
+
+    let info = ShaderInfo {
+        program: &program.program,
+        canvas_height,
+        canvas_width,
+        vertex_position: program.vertex_position,
+        vertex_color: program.vertex_color,
+        program_projection_matrix: &program.projection_matrix,
+        program_model_view_matrix: &program.model_view_matrix,
+    };
+
+    draw_colored_square(&context, &info, &buffers);
+
+    Ok(())
+}
+
+pub struct ShaderProgramInfo {
+    pub program: WebGlProgram,
+    pub vertex_position: u32,
+    pub vertex_color: u32,
+    pub projection_matrix: WebGlUniformLocation,
+    pub model_view_matrix: WebGlUniformLocation,
+}
+
+pub fn setup_shader_program(
+    context: &WebGl2RenderingContext,
+) -> Result<ShaderProgramInfo, JsValue> {
     let vertex_shader = compile_shader(
         &context,
         WebGl2RenderingContext::VERTEX_SHADER,
@@ -41,6 +71,7 @@ pub fn main(
     )?;
 
     let program = link_shader_program(&context, &vertex_shader, &fragment_shader)?;
+
     context.use_program(Some(&program));
 
     let vertex_position = context.get_attrib_location(&program, "aVertexPosition") as u32;
@@ -55,8 +86,6 @@ pub fn main(
     let vertex_color = context.get_attrib_location(&program, "aVertexColor") as u32;
     context.enable_vertex_attrib_array(vertex_color);
 
-    let buffers = init_buffers(&context);
-
     let vao = context
         .create_vertex_array()
         .ok_or("Could not create vertex array object")?;
@@ -66,22 +95,16 @@ pub fn main(
     context.enable_vertex_attrib_array(vertex_position);
     context.bind_vertex_array(Some(&vao));
 
-    let info = ShaderInfo {
-        program: &program,
-        canvas_height,
-        canvas_width,
+    Ok(ShaderProgramInfo {
+        program,
         vertex_position,
         vertex_color,
-        program_projection_matrix: &projection_matrix,
-        program_model_view_matrix: &model_view_matrix,
-    };
-
-    draw_colored_square(&context, &info, &buffers);
-
-    Ok(())
+        projection_matrix,
+        model_view_matrix,
+    })
 }
 
-fn init_buffers(context: &WebGl2RenderingContext) -> (WebGlBuffer, WebGlBuffer) {
+pub fn init_buffers(context: &WebGl2RenderingContext) -> (WebGlBuffer, WebGlBuffer) {
     let positions = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
 
     let position_buffer = context
