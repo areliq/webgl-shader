@@ -2,13 +2,13 @@
   import './styles.css';
 </script>
 
-<div class="app">
+<!-- <div class="app"> -->
 
-  <main>
+  <!-- <main> -->
     <slot />
-  </main>
+  <!-- </main> -->
 
-  <footer>
+  <!-- <footer>
     <p>I am footer.</p>
-  </footer>
-</div>
+  </footer> -->
+<!-- </div> -->

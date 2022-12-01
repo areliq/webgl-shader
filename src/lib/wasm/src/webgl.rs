@@ -32,6 +32,25 @@ pub fn get_context_by_id(id: &str) -> Result<(WebGl2RenderingContext, CanvasProp
     Ok((context, properties))
 }
 
+pub fn get_context_with_canvas_by_id(id: &str) -> Result<(WebGl2RenderingContext, web_sys::HtmlCanvasElement), String> {
+    let document = web_sys::window().unwrap().document().unwrap();
+
+    let canvas: web_sys::HtmlCanvasElement = document
+        .get_element_by_id(id)
+        .unwrap()
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .unwrap();
+
+    let context = canvas
+        .get_context("webgl2")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<WebGl2RenderingContext>()
+        .unwrap();
+
+    Ok((context, canvas))
+}
+
 pub fn compile_shader(
     context: &WebGl2RenderingContext,
     shader_type: u32,
