@@ -32,7 +32,9 @@ pub fn get_context_by_id(id: &str) -> Result<(WebGl2RenderingContext, CanvasProp
     Ok((context, properties))
 }
 
-pub fn get_context_with_canvas_by_id(id: &str) -> Result<(WebGl2RenderingContext, web_sys::HtmlCanvasElement), String> {
+pub fn get_context_with_canvas_by_id(
+    id: &str,
+) -> Result<(WebGl2RenderingContext, web_sys::HtmlCanvasElement), String> {
     let document = web_sys::window().unwrap().document().unwrap();
 
     let canvas: web_sys::HtmlCanvasElement = document

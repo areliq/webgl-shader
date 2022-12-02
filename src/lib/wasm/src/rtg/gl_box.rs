@@ -3,95 +3,123 @@ use wasm_bindgen::prelude::*;
 // use wasm_bindgen::JsValue;
 // use wasm_bindgen::JsCast;
 
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext}; // , WebGlUniformLocation
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlUniformLocation};
 extern crate nalgebra_glm as glm;
 
 use crate::utils::log;
 use crate::webgl::{compile_shader, get_context_with_canvas_by_id, link_shader_program};
 
-static VERTEX_SHADER_SOURCE: &'static str = r#"#version 300 es
-// The individual position vertex
-in vec2 position;
-
-void main() {
-  // the gl_Position is the final position in clip space 
-  // after the vertex shader modifies it
-  gl_Position = vec4(position, 0.0, 1.0);
-}
-"#;
-
-static FRAGMENT_SHADER_SOURCE: &'static str = r#"#version 300 es
-precision mediump float;
-out vec4 fragColor;
-uniform vec2 u_resolution;
-
-void main() {
-  // vec2 res = vec2(1094, 929);
-  // vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution) / min(u_resolution.x, u_resolution.y);
-  vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-  // fragColor = vec4(uv.x, 0.0, uv.y, 1.0);
-  fragColor = vec4(1.0, uv, 1.0);
-}
-"#;
-
 #[wasm_bindgen]
-pub struct HelloBoard {
+pub struct GlBox {
     context: WebGl2RenderingContext,
     canvas: HtmlCanvasElement,
     loc_position: u32,
     // loc_color: WebGlUniformLocation,
+    loc_time: Option<WebGlUniformLocation>,
 }
 
 #[wasm_bindgen]
-impl HelloBoard {
-    pub fn new(id: &str) -> Self {
-        let (context, canvas) = get_context_with_canvas_by_id(id).unwrap();
+impl GlBox {
+    pub fn new(
+        id: &str,
+        dynamic: bool,
+        vertex_shader_source: &str,
+        fragment_shader_source: &str,
+    ) -> Self {
+        let (context, canvas) = get_context_with_canvas_by_id(id).unwrap_or_else(|err| {
+            log(&err);
+            panic!("Failed to compile vertex shader");
+        });
+
+        log("GlBox.new: context ok");
 
         resize_of(&context, &canvas);
+
+        log("GlBox.new: resize ok");
 
         let vertex_shader = compile_shader(
             &context,
             WebGl2RenderingContext::VERTEX_SHADER,
-            VERTEX_SHADER_SOURCE,
+            vertex_shader_source,
         )
         .unwrap_or_else(|err| {
             log(&err);
             panic!("Failed to compile vertex shader");
         });
 
+        log("GlBox.new: vertex shader compiled");
+
         let fragment_shader = compile_shader(
             &context,
             WebGl2RenderingContext::FRAGMENT_SHADER,
-            FRAGMENT_SHADER_SOURCE,
+            fragment_shader_source,
         )
         .unwrap_or_else(|err| {
             log(&err);
             panic!("Failed to compile fragment shader");
         });
 
-        let program = link_shader_program(&context, &vertex_shader, &fragment_shader).unwrap();
+        log("GlBox.new: fragment shader compiled");
+
+        let program = link_shader_program(&context, &vertex_shader, &fragment_shader)
+            .unwrap_or_else(|err| {
+                log(&err);
+                panic!("Failed to compile link shader");
+            });
+
+        log("GlBox.new: shaders linked to program");
 
         context.use_program(Some(&program));
 
+        log("GlBox.new: use program ok");
+
+        // set resolution (if not, it will become [0.0, 0.0])
         let loc_resolution = context
             .get_uniform_location(&program, "u_resolution")
-            .unwrap();
-        // let resolution: js_sys::Float32Array = context
-        //   .get_uniform(&program, &loc_resolution)
-        //   .try_into()
-        //   .unwrap();
+            .unwrap_or_else(|| {
+                panic!("Failed to get uniform location: u_resolution unwrap");
+            });
 
-        // let vec_resolution = resolution.to_vec();
+        log("GlBox.new: u_resolution location ok");
+
         let viewport: [f32; 2] = [canvas.width() as f32, canvas.height() as f32];
+
+        log("GlBox.new: viewport ok");
         context.uniform2fv_with_f32_array(Some(&loc_resolution), &viewport);
-        // log(&format!("resolution: {:?}", vec_resolution));
+
+        log("GlBox.new: set viewport to u_resolution ok");
+
+        let loc_time = if dynamic {
+            // set time
+            let loc_time = context
+                .get_uniform_location(&program, "u_time")
+                .unwrap_or_else(|| {
+                    panic!("Failed to get uniform location: u_time");
+                });
+
+            log("GlBox.new: u_time location ok");
+
+            let current = get_current_sec() as f32;
+            context.uniform1f(Some(&loc_time), current);
+
+            log("GlBox.new: set time to u_time ok");
+
+            Some(loc_time)
+        } else {
+            None
+        };
 
         // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGlRenderingContext.html#method.get_attrib_location
         // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getAttribLocation
         let loc_position: u32 = context
             .get_attrib_location(&program, "position")
             .try_into()
-            .unwrap();
+            .unwrap_or_else(|_| {
+                // log(&err);
+                panic!("Failed to get attribute location: position");
+            });
+
+        log("GlBox.new: attribute location 'position' ok");
 
         // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGlRenderingContext.html#method.get_uniform_location
         // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getUniformLocation
@@ -101,11 +129,14 @@ impl HelloBoard {
         // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/enable
         context.enable(WebGl2RenderingContext::DEPTH_TEST);
 
-        HelloBoard {
+        log("GlBox.new: DEPTH_TEST ok");
+
+        GlBox {
             context,
             canvas,
             loc_position,
-        } // , loc_color
+            loc_time,
+        }
     }
 
     fn bind_position_buffer(&self, positions: &[f32]) {
@@ -153,9 +184,7 @@ impl HelloBoard {
     // }
 
     pub fn draw(&self) {
-        // self.resize();
-
-        log(&format!("viewport: {}", WebGl2RenderingContext::VIEWPORT));
+        resize_of(&self.context, &self.canvas);
 
         let positions = [
             // Triangle 1
@@ -168,10 +197,7 @@ impl HelloBoard {
             1.0, 1.0, // right-top
         ];
 
-        // let color = [1.0, 0.0, 0.5, 1.0] as [f32; 4];
-
         self.bind_position_buffer(&positions);
-        // self.bind_color_buffer(&color);
 
         // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGlRenderingContext.html#method.draw_arrays
         // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawArrays
@@ -181,52 +207,25 @@ impl HelloBoard {
             .draw_arrays(WebGl2RenderingContext::TRIANGLES, offset, vertex_count);
     }
 
-    // TODO: refactor
-    pub fn resize(&self) {
-        let display_width: u32 = self.canvas.client_width().try_into().unwrap();
-        let display_height: u32 = self.canvas.client_height().try_into().unwrap();
-
-        let canvas_width = self.canvas.width();
-        let canvas_height = self.canvas.height();
-
-        log(&format!(
-            "display w: {} / canvas w: {}",
-            display_width, canvas_width
-        ));
-        log(&format!(
-            "display h: {} / canvas h: {}",
-            display_height, canvas_height
-        ));
-
-        if canvas_width != display_width || canvas_height != display_height {
-            self.canvas.set_width(display_width);
-            self.canvas.set_height(display_height);
+    pub fn tick(&self, timestamp: f64) {
+        match &self.loc_time {
+            None => {}
+            Some(loc) => {
+                let current = timestamp as f32;
+                self.context.uniform1f(Some(&loc), current);
+            }
         }
-
-        let new_width: i32 = self.canvas.width().try_into().unwrap();
-        let new_height: i32 = self.canvas.height().try_into().unwrap();
-
-        log(&format!("new w: {} / h: {}", new_width, new_height));
-
-        self.context.viewport(0, 0, new_width, new_height);
     }
 }
 
 fn resize_of(context: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
-    let display_width: u32 = canvas.client_width().try_into().unwrap();
+    let display_width: u32 = canvas.client_width().try_into().unwrap_or_else(|_| {
+        panic!("Failed to get display width");
+    });
     let display_height: u32 = canvas.client_height().try_into().unwrap();
 
     let canvas_width = canvas.width();
     let canvas_height = canvas.height();
-
-    log(&format!(
-        "display w: {} / canvas w: {}",
-        display_width, canvas_width
-    ));
-    log(&format!(
-        "display h: {} / canvas h: {}",
-        display_height, canvas_height
-    ));
 
     if canvas_width != display_width || canvas_height != display_height {
         canvas.set_width(display_width);
@@ -236,9 +235,13 @@ fn resize_of(context: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
     let new_width: i32 = canvas.width().try_into().unwrap();
     let new_height: i32 = canvas.height().try_into().unwrap();
 
-    log(&format!("new w: {} / h: {}", new_width, new_height));
-
     context.viewport(0, 0, new_width, new_height);
 }
 
-// todo: check len(positions) / num_components == vertex_count
+fn get_current_sec() -> f64 {
+    js_sys::Date::now() / 1000.0 // sec
+}
+
+// fn get_current_msec() -> f64 {
+//     js_sys::Date::now()  // msec
+// }

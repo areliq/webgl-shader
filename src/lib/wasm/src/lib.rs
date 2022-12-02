@@ -1,10 +1,10 @@
 extern crate wasm_bindgen;
 use wasm_bindgen::prelude::*;
 
-mod rtg;
 mod examples;
-mod webgl;
+mod rtg;
 mod utils;
+mod webgl;
 use crate::examples::colored_square::main as draw_colored_square;
 use crate::examples::colored_square_rotate::start as start_colored_square_rotate;
 use crate::webgl::get_context_by_id;
