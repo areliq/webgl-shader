@@ -4,6 +4,7 @@ use wasm_bindgen::prelude::*;
 // use wasm_bindgen::JsCast;
 
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlUniformLocation};
+extern crate console_error_panic_hook;
 extern crate nalgebra_glm as glm;
 
 use crate::utils::log;
@@ -26,6 +27,8 @@ impl GlBox {
         vertex_shader_source: &str,
         fragment_shader_source: &str,
     ) -> Self {
+        console_error_panic_hook::set_once();
+
         let (context, canvas) = get_context_with_canvas_by_id(id).unwrap_or_else(|err| {
             log(&err);
             panic!("Failed to compile vertex shader");
@@ -74,20 +77,21 @@ impl GlBox {
         log("GlBox.new: use program ok");
 
         // set resolution (if not, it will become [0.0, 0.0])
-        let loc_resolution = context
-            .get_uniform_location(&program, "u_resolution")
-            .unwrap_or_else(|| {
-                panic!("Failed to get uniform location: u_resolution unwrap");
-            });
+        let loc_resolution = context.get_uniform_location(&program, "u_resolution");
 
         log("GlBox.new: u_resolution location ok");
 
-        let viewport: [f32; 2] = [canvas.width() as f32, canvas.height() as f32];
-
-        log("GlBox.new: viewport ok");
-        context.uniform2fv_with_f32_array(Some(&loc_resolution), &viewport);
-
-        log("GlBox.new: set viewport to u_resolution ok");
+        match loc_resolution {
+            None => {
+                log("no location for u_resolution");
+            }
+            Some(loc) => {
+                let viewport: [f32; 2] = [canvas.width() as f32, canvas.height() as f32];
+                log("GlBox.new: viewport ok");
+                context.uniform2fv_with_f32_array(Some(&loc), &viewport);
+                log("GlBox.new: set viewport to u_resolution ok");
+            }
+        }
 
         let loc_time = if dynamic {
             // set time

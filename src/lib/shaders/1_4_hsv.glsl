@@ -3,7 +3,7 @@ precision highp float;
 
 out vec4 fragColor;
 
-uniform float u_time;
+// uniform float u_time;
 uniform vec2 u_resolution;
 
 const float PI = 3.1415926;
@@ -28,14 +28,13 @@ vec3 hsv2rgb(vec3 c) { // fork from https://www.shadertoy.com/view/MsS3Wc
 void main() {
     vec2 pos = gl_FragCoord.xy / u_resolution.xy;
 
-    // not work; maybe these process have some mistake
-    // pos = 2.0 * pos.xy - vec2(1.0);
-    // pos = xy2pol(pos);
-    // pos.x = mod(0.5 * pos.x / PI, 1.0);
+    pos = 2.0 * pos.xy - vec2(1.0);
+    pos = xy2pol(pos);
+    pos.x = mod(0.5 * pos.x / PI, 1.0);
     // fragColor = vec4(0.1);
-    // fragColor.rgb = hsv2rgb(vec3(pos, 1.0));
-    // fragColor.a = 1.0;
+    fragColor.rgb = hsv2rgb(vec3(pos, 1.0));
+    fragColor.a = 1.0;
     // fragColor = vec4(vec3(pos, 1.0), 1.0);
 
-    fragColor = vec4(abs(sin(u_time)), pos, 1.0);
+    // fragColor = vec4(abs(sin(u_time)), pos, 1.0);
 }

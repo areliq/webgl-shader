@@ -9,6 +9,10 @@ use crate::examples::colored_square::main as draw_colored_square;
 use crate::examples::colored_square_rotate::start as start_colored_square_rotate;
 use crate::webgl::get_context_by_id;
 
+#[cfg(feature = "wee_alloc")]
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 #[wasm_bindgen]
 extern "C" {
     pub fn alert(s: &str);

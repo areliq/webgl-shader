@@ -7,16 +7,16 @@
     onMount(async () => {
       await init();
 
-      const square = GlBox.new("canvas", true, vertexShader, fragmentShader);
+      const square = GlBox.new("canvas", false, vertexShader, fragmentShader);
 
-      const renderLoop: FrameRequestCallback = (timestamp) => {
-        square.tick(timestamp / 1000);
+      // const renderLoop: FrameRequestCallback = (timestamp) => {
+      //   square.tick(timestamp / 1000);
         square.draw();
 
-        requestAnimationFrame(renderLoop);
-      };
+      //   requestAnimationFrame(renderLoop);
+      // };
 
-      requestAnimationFrame(renderLoop);
+      // requestAnimationFrame(renderLoop);
     })
   </script>
   
