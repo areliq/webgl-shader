@@ -3,12 +3,14 @@ use wasm_bindgen::prelude::*;
 // use wasm_bindgen::JsValue;
 use wasm_bindgen::JsCast;
 
-use web_sys::{HtmlCanvasElement, WebGlBuffer, WebGl2RenderingContext, WebGlUniformLocation, WebGlProgram, WebGlShader};
+use web_sys::{
+    HtmlCanvasElement, WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlShader,
+    WebGlUniformLocation,
+};
 extern crate console_error_panic_hook;
 extern crate nalgebra_glm as glm;
 
 // use crate::utils::log;
-
 
 static VS_SRC: &'static str = r#"#version 300 es
 in vec4 aVertexPosition;
@@ -64,60 +66,35 @@ void main() {
 
 static CUBE_POSITIONS: [f32; 72] = [
     // Front face: White
-    -1.0, -1.0,  1.0,  // debug: skyblue
-     1.0, -1.0,  1.0,  // debug: red
-     1.0,  1.0,  1.0,  // debug: green
-    -1.0,  1.0,  1.0,  // debug: blue
-    
+    -1.0, -1.0, 1.0, // debug: skyblue
+    1.0, -1.0, 1.0, // debug: red
+    1.0, 1.0, 1.0, // debug: green
+    -1.0, 1.0, 1.0, // debug: blue
     // Back face: Red
-    -1.0, -1.0, -1.0, 
-    -1.0,  1.0, -1.0, 
-     1.0,  1.0, -1.0, 
-     1.0, -1.0, -1.0,
-
-    // Top face
-    -1.0,  1.0, -1.0, 
-    -1.0,  1.0,  1.0, 
-     1.0,  1.0,  1.0, 
-     1.0,  1.0, -1.0,  // 11
-
+    -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, // Top face
+    -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, // 11
     // Bottom face
-    -1.0, -1.0, -1.0, 
-     1.0, -1.0, -1.0, 
-     1.0, -1.0,  1.0, 
-    -1.0, -1.0,  1.0,
-
-    // Right face
-     1.0, -1.0, -1.0, 
-     1.0,  1.0, -1.0, 
-     1.0,  1.0,  1.0, 
-     1.0, -1.0,  1.0,
-
-    // Left face: Purple
-    -1.0, -1.0, -1.0, 
-    -1.0, -1.0,  1.0, 
-    -1.0,  1.0,  1.0, 
-    -1.0,  1.0, -1.0,
+    -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, // Right face
+    1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, // Left face: Purple
+    -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0,
 ];
 
 // static SQUARE_INDICES: [u16; 6] = [
 //     0, 1, 2, 1, 2, 3
 // ];
 
-
 // This array defines each face as two triangles, using the
 // indices into the vertex array to specify each triangle's
 // position.
 static CUBE_INDICES: [u16; 36] = [
-     0,  1,  2,  0,  2,  3, // front
-     4,  5,  6,  4,  6,  7, // back
-     8,  9, 10,  8, 10, 11, // top: green
+    0, 1, 2, 0, 2, 3, // front
+    4, 5, 6, 4, 6, 7, // back
+    8, 9, 10, 8, 10, 11, // top: green
     12, 13, 14, 12, 14, 15, // bottom
     16, 17, 18, 16, 18, 19, // right
     20, 21, 22, 20, 22, 23, // left: purple
-    // 20, 21, 22, 23, 20, 21, // left: purple
+        // 20, 21, 22, 23, 20, 21, // left: purple
 ];
-
 
 fn cube_colors() -> Vec<f32> {
     let face_colors: [[f32; 4]; 6] = [
@@ -129,7 +106,8 @@ fn cube_colors() -> Vec<f32> {
         [1.0, 0.0, 1.0, 1.0], // Left face: purple
     ];
 
-    face_colors.iter()
+    face_colors
+        .iter()
         .map(|color| color.repeat(4))
         .collect::<Vec<_>>()
         .concat()
@@ -142,13 +120,12 @@ fn cube_colors() -> Vec<f32> {
     //         // [1.0, 1.0, 0.0, 1.0], // Right face: yellow
     //         // [1.0, 0.0, 1.0, 1.0], // Left face: purple
     // ];
-    
-    // face_colors.to_vec() // iter()
-        // .map(|color| color.repeat(4))
-        // .collect::<Vec<_>>()
-        // .concat()
-}
 
+    // face_colors.to_vec() // iter()
+    // .map(|color| color.repeat(4))
+    // .collect::<Vec<_>>()
+    // .concat()
+}
 
 #[wasm_bindgen]
 pub struct RotatingCube {
@@ -164,9 +141,7 @@ pub struct RotatingCube {
 
 #[wasm_bindgen]
 impl RotatingCube {
-    pub fn new(
-        id: &str,
-    ) -> Self {
+    pub fn new(id: &str) -> Self {
         console_error_panic_hook::set_once();
 
         let (ctx, canvas) = get_context_by_id(id).unwrap();
@@ -181,10 +156,13 @@ impl RotatingCube {
         // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/enable
         ctx.enable(WebGl2RenderingContext::DEPTH_TEST);
 
-        RotatingCube { context: ctx, canvas, location, delta: 0.0, }
+        RotatingCube {
+            context: ctx,
+            canvas,
+            location,
+            delta: 0.0,
+        }
     }
-
-    
 
     // fn bind_color_buffer(&self, color: &[f32]) {
     //     // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGlRenderingContext.html#method.uniform4fv_with_f32_array
@@ -205,7 +183,9 @@ impl RotatingCube {
         self.context.enable(WebGl2RenderingContext::DEPTH_TEST);
         self.context.depth_func(WebGl2RenderingContext::LEQUAL);
 
-        self.context.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT | WebGl2RenderingContext::DEPTH_BUFFER_BIT);
+        self.context.clear(
+            WebGl2RenderingContext::COLOR_BUFFER_BIT | WebGl2RenderingContext::DEPTH_BUFFER_BIT,
+        );
 
         // let vao = self.context.create_vertex_array().unwrap();
         // self.context.bind_vertex_array(Some(&vao));
@@ -218,10 +198,11 @@ impl RotatingCube {
         self.set_vertex_attribute(self.location.vertex_color, 4, &buf_colors);
 
         // why need to bind again?
-        self.context
-            .bind_buffer(WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER, Some(&buf_indices));
+        self.context.bind_buffer(
+            WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
+            Some(&buf_indices),
+        );
 
-       
         // setup matrix
         let field_of_view = 45.0 * std::f32::consts::PI / 180.0;
         let aspect = self.canvas.client_width() as f32 / self.canvas.client_height() as f32;
@@ -241,19 +222,19 @@ impl RotatingCube {
         let model_view_matrix = glm::rotate(
             &model_view_matrix,
             self.delta,
-            &glm::TVec3::new(0.0, 0.0, 1.0),  // rotate around axis Z
+            &glm::TVec3::new(0.0, 0.0, 1.0), // rotate around axis Z
         );
 
         let model_view_matrix = glm::rotate(
             &model_view_matrix,
             self.delta * 0.7,
-            &glm::TVec3::new(0.0, 1.0, 0.0),  // rotate around axis Y
+            &glm::TVec3::new(0.0, 1.0, 0.0), // rotate around axis Y
         );
 
         let model_view_matrix = glm::rotate(
             &model_view_matrix,
             self.delta * 0.3,
-            &glm::TVec3::new(1.0, 0.0, 0.0),  // rotate around axis X
+            &glm::TVec3::new(1.0, 0.0, 0.0), // rotate around axis X
         );
 
         let vec_projection_matrix = projection_matrix.iter().map(|v| *v).collect::<Vec<_>>();
@@ -264,13 +245,13 @@ impl RotatingCube {
             false,
             &vec_projection_matrix,
         );
-    
+
         self.context.uniform_matrix4fv_with_f32_array(
             Some(&self.location.model_view_matrix),
             false,
             &vec_model_view_matrix,
         );
-    
+
         // draw
         let offset = 0;
         let vertex_count: i32 = CUBE_INDICES.len().try_into().unwrap();
@@ -279,11 +260,11 @@ impl RotatingCube {
 
         // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGl2RenderingContext.html#method.draw_elements_instanced_with_f64
         self.context.draw_elements_instanced_with_i32(
-            WebGl2RenderingContext::TRIANGLES, 
+            WebGl2RenderingContext::TRIANGLES,
             // WebGl2RenderingContext::POINTS,
             // WebGl2RenderingContext::LINES,
-            vertex_count, 
-            data_type, 
+            vertex_count,
+            data_type,
             offset,
             instance_count,
         );
@@ -316,11 +297,9 @@ impl RotatingCube {
         let stride = 0;
         let offset = 0;
 
-
         // why need to bind again?
         self.context
             .bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(buffer));
-
 
         // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGl2RenderingContext.html#method.vertex_attrib_pointer_with_i32
         // https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/vertexAttribIPointer
@@ -331,7 +310,7 @@ impl RotatingCube {
             normalize,
             stride,
             offset,
-        );        
+        );
     }
 
     fn bind_index_buffer(&self, indices: &[u16]) -> WebGlBuffer {
@@ -342,7 +321,7 @@ impl RotatingCube {
 
         unsafe {
             let index_buffer_view = js_sys::Uint16Array::view(indices);
-    
+
             self.context.buffer_data_with_array_buffer_view(
                 WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
                 &index_buffer_view,
@@ -456,7 +435,6 @@ fn link_shader_program(
     }
 }
 
-
 struct Location {
     vertex_position: u32,
     vertex_color: u32,
@@ -464,33 +442,36 @@ struct Location {
     projection_matrix: WebGlUniformLocation,
 }
 
-fn get_locations(context: &WebGl2RenderingContext, program: &WebGlProgram) -> Result<Location, String> {
-        // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGlRenderingContext.html#method.get_attrib_location
-        // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getAttribLocation
-        let loc_vertex_position: u32 = context
-            .get_attrib_location(&program, "aVertexPosition")
-            .try_into()
-            .unwrap(); //_or_else(|| String::from("Failed to get attribute location: aVertexPosition"));
+fn get_locations(
+    context: &WebGl2RenderingContext,
+    program: &WebGlProgram,
+) -> Result<Location, String> {
+    // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGlRenderingContext.html#method.get_attrib_location
+    // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getAttribLocation
+    let loc_vertex_position: u32 = context
+        .get_attrib_location(&program, "aVertexPosition")
+        .try_into()
+        .unwrap(); //_or_else(|| String::from("Failed to get attribute location: aVertexPosition"));
 
-        let loc_vertex_color: u32 = context
-            .get_attrib_location(&program, "aVertexColor")
-            .try_into()
-            .unwrap(); // _or_else(|| String::from("Failed to get attribute location: aVertexColor"));
+    let loc_vertex_color: u32 = context
+        .get_attrib_location(&program, "aVertexColor")
+        .try_into()
+        .unwrap(); // _or_else(|| String::from("Failed to get attribute location: aVertexColor"));
 
-        // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGlRenderingContext.html#method.get_uniform_location
-        // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getUniformLocation
-        let loc_model_view_matrix = context
-            .get_uniform_location(&program, "uModelViewMatrix")
-            .unwrap(); // _or_else(|| String::from("Failed to get uniform location: uModelViewMatrix"));
+    // https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.WebGlRenderingContext.html#method.get_uniform_location
+    // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getUniformLocation
+    let loc_model_view_matrix = context
+        .get_uniform_location(&program, "uModelViewMatrix")
+        .unwrap(); // _or_else(|| String::from("Failed to get uniform location: uModelViewMatrix"));
 
-        let loc_projection_matrix = context
-            .get_uniform_location(&program, "uProjectionMatrix")
-            .unwrap(); // _or_else(|| String::from("Failed to get uniform location: uProjectionMatrix"));
+    let loc_projection_matrix = context
+        .get_uniform_location(&program, "uProjectionMatrix")
+        .unwrap(); // _or_else(|| String::from("Failed to get uniform location: uProjectionMatrix"));
 
-        Ok(Location {
-            vertex_position: loc_vertex_position, 
-            vertex_color: loc_vertex_color, 
-            model_view_matrix: loc_model_view_matrix, 
-            projection_matrix: loc_projection_matrix,
-        })
+    Ok(Location {
+        vertex_position: loc_vertex_position,
+        vertex_color: loc_vertex_color,
+        model_view_matrix: loc_model_view_matrix,
+        projection_matrix: loc_projection_matrix,
+    })
 }
