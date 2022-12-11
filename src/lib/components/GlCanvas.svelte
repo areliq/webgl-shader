@@ -1,6 +1,6 @@
 <script lang="ts">
     import vertexShader from '$lib/shaders/vertex_common.glsl';
-    import fragmentShader from '$lib/shaders/5_4_blending.glsl';
+    import fragmentShader from '$lib/shaders/fragment_test_uniform.glsl';
     import { onMount } from 'svelte';
     import init, { GlBox } from '$lib/wasm/pkg';
 

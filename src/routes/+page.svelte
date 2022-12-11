@@ -1,8 +1,11 @@
+<script lang="ts">
+  import fragmentShader from '$lib/shaders/fragment_test_uniform.glsl';
+  import GlCanvas from '$lib/components/GlCanvas.svelte'
+</script>
+  
 <svelte:head>
-  <title>Home</title>
+  <title>WebGL Canvas</title>
   <meta name="description" content="WebGL Shader App" />
 </svelte:head>
 
-<h1>WebGL Shader App</h1>
-
-<a href="/tutorials">from tutorials</a>
+<GlCanvas fShader={fragmentShader} />
