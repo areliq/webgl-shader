@@ -25,7 +25,7 @@
   </script>
 
   <style>
-    canvas {
+    #canvas {
       width: 100vw;
       height: 100vh;
       display: block;
