@@ -10,10 +10,44 @@
 //   const slider = {
 //     num, current, prev, next, select
 //   }
+import vertexShader from '$lib/shaders/vertex_common.glsl';
+import fsTest from '$lib/shaders/fragment_test_uniform.glsl';
+import fsPeriodic from '$lib/shaders/periodic_perlin_noise.glsl';
+import fsPerlin from '$lib/shaders/perlin_noise.glsl';
+import fsVgNoise from '$lib/shaders/reference.glsl';
+import fsBrending from '$lib/shaders/blending.glsl';
+
+import { onMount, beforeUpdate } from 'svelte';
+import init, { GlBox } from '$lib/wasm/pkg';
+
+const shaders = [
+  fsTest, fsPeriodic, fsPerlin, fsVgNoise, fsBrending,
+]
+
+const vShader = vertexShader;
+let current = 0
+let fShader = shaders[current];
+let dynamic = true;
+
+beforeUpdate(async () => {
+  await init();
+
+  const square = GlBox.new("canvas", dynamic, vShader, fShader);
+
+  const renderLoop: FrameRequestCallback = (timestamp) => {
+    square.tick(timestamp / 1000);
+    square.draw();
+
+    requestAnimationFrame(renderLoop);
+  };
+
+    requestAnimationFrame(renderLoop);
+})
+  
 </script>
 
-<Slider num={5} on:slide={event => console.log(event.detail.next)}>
-  <canvas />
+<Slider num={shaders.length} on:slide={event => fShader = shaders[event.detail.next]}>
+  <canvas id="canvas" />
 </Slider>
 
 <style>

@@ -39,6 +39,8 @@
   }
   .indicator .active {
     background-color: var(--color-theme-2);
+    transition-property: background-color;
+    transition-duration: 0.6s;
   }
   .cursor {
     height: 32px;
@@ -64,10 +66,14 @@
   } */
   .cursor:hover {
     filter:brightness(1.2);
+    transition-property: filter;
+    transition-duration: 0.4s;
   }
   .cursor:disabled {
     filter:brightness(0.8);
     cursor: not-allowed;
+    transition-property: filter;
+    transition-duration: 0.4s;
   }
 </style>
 
