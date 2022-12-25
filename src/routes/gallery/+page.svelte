@@ -16,12 +16,14 @@ import fsPeriodic from '$lib/shaders/periodic_perlin_noise.glsl';
 import fsPerlin from '$lib/shaders/perlin_noise.glsl';
 import fsVgNoise from '$lib/shaders/reference.glsl';
 import fsBrending from '$lib/shaders/blending.glsl';
+import fsFBM from '$lib/shaders/frac_brownian_motion.glsl';
 
-import { onMount, beforeUpdate } from 'svelte';
+import { beforeUpdate } from 'svelte';
 import init, { GlBox } from '$lib/wasm/pkg';
 
 const shaders = [
   fsTest, fsPeriodic, fsPerlin, fsVgNoise, fsBrending,
+  fsFBM,
 ]
 
 const vShader = vertexShader;
