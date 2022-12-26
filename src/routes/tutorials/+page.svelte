@@ -1,4 +1,3 @@
- 
 <svelte:head>
   <title>WebGL Tutorial with Rust</title>
   <meta name="description" content="WebGL Shader App" />

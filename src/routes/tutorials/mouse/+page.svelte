@@ -13,22 +13,22 @@
   const handleMouseMoveOnCanvas = (ev: any /* TODO: typing */) => {
     const target = ev.target;
     const rect = target.getBoundingClientRect();
-    
+
     const relativeMousePosition = {
       x: ev.clientX - rect.left,
-      y: ev.clientY - rect.top,
-    }
+      y: ev.clientY - rect.top
+    };
 
-    m.x = relativeMousePosition.x * target.width / target.clientWidth;
-    m.y = relativeMousePosition.y * target.height / target.clientHeight;
+    m.x = (relativeMousePosition.x * target.width) / target.clientWidth;
+    m.y = (relativeMousePosition.y * target.height) / target.clientHeight;
 
     // console.log(`mouse updates: (${m.x}, ${m.y})`);
-  }
+  };
 
   onMount(async () => {
     await init();
 
-    const square = MouseBox.new("canvas", dynamic, vShader, fShader);
+    const square = MouseBox.new('canvas', dynamic, vShader, fShader);
 
     const renderLoop: FrameRequestCallback = (timestamp) => {
       square.tick(timestamp / 1000, m.x, m.y);
@@ -38,8 +38,10 @@
     };
 
     requestAnimationFrame(renderLoop);
-  })
+  });
 </script>
+
+<canvas id="canvas" on:mousemove={handleMouseMoveOnCanvas} />
 
 <style>
   #canvas {
@@ -48,5 +50,3 @@
     display: block;
   }
 </style>
-
-<canvas id="canvas" on:mousemove={handleMouseMoveOnCanvas}></canvas>

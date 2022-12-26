@@ -4,11 +4,11 @@
 
 <!-- <div class="app"> -->
 
-  <!-- <main> -->
-    <slot />
-  <!-- </main> -->
+<!-- <main> -->
+<slot />
+<!-- </main> -->
 
-  <!-- <footer>
+<!-- <footer>
     <p>I am footer.</p>
   </footer> -->
 <!-- </div> -->

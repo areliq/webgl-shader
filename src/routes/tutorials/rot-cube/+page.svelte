@@ -5,9 +5,9 @@
   onMount(async () => {
     await init();
 
-    const cube = RotatingCube.new("canvas");
+    const cube = RotatingCube.new('canvas');
     const renderLoop: FrameRequestCallback = (timestamp) => {
-      const delta = (timestamp / 1000);
+      const delta = timestamp / 1000;
       cube.tick(delta);
       cube.draw();
 
@@ -15,14 +15,16 @@
     };
 
     requestAnimationFrame(renderLoop);
-  })
+  });
 </script>
-  
+
 <svelte:head>
   <title>WebGL</title>
   <meta name="description" content="WebGL Shader App" />
 </svelte:head>
-  
+
+<canvas id="canvas" />
+
 <style>
   canvas {
     width: 100vw;
@@ -30,5 +32,3 @@
     display: block;
   }
 </style>
-  
-<canvas id="canvas"></canvas>

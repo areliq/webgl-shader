@@ -1,14 +1,40 @@
+<script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
+
+  export let num: number = 3;
+  export let current: number = 0;
+  // export let prev = (idx: number) => () => { console.log('prev: ' + idx) }
+  // export let next = (idx: number) => () => { console.log('next: ' + idx) }
+  // export let select = (idx: number) => () => { console.log('select: ' + idx) }
+
+  const update = (idx: number) => () => {
+    if (current < 0 || num <= current) {
+      return;
+    }
+    current = idx;
+    dispatch('slide', { next: current });
+  };
+</script>
+
 <div class="container">
   <div class="image">
     <slot />
   </div>
   <div class="indicator">
-    <button class="cursor prev" disabled={current < 1} on:click|preventDefault={update(current - 1)}>&lt;</button>
+    <button class="cursor prev" disabled={current < 1} on:click|preventDefault={update(current - 1)}
+      >&lt;</button
+    >
     {#each Array(num) as _, idx}
-    {@const active = idx === current}
-    <button class="selector" class:active on:click|preventDefault={update(idx)}></button>
+      {@const active = idx === current}
+      <button class="selector" class:active on:click|preventDefault={update(idx)} />
     {/each}
-    <button class="cursor next" disabled={current >= num - 1} on:click|preventDefault={update(current + 1)}>&gt;</button>
+    <button
+      class="cursor next"
+      disabled={current >= num - 1}
+      on:click|preventDefault={update(current + 1)}>&gt;</button
+    >
   </div>
 </div>
 
@@ -65,32 +91,14 @@
     transform: translate(-4px, 0);
   } */
   .cursor:hover {
-    filter:brightness(1.2);
+    filter: brightness(1.2);
     transition-property: filter;
     transition-duration: 0.4s;
   }
   .cursor:disabled {
-    filter:brightness(0.8);
+    filter: brightness(0.8);
     cursor: not-allowed;
     transition-property: filter;
     transition-duration: 0.4s;
   }
 </style>
-
-<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-
-  const dispatch = createEventDispatcher();
-
-  export let num: number = 3;
-  export let current: number = 0;
-  // export let prev = (idx: number) => () => { console.log('prev: ' + idx) }
-  // export let next = (idx: number) => () => { console.log('next: ' + idx) }
-  // export let select = (idx: number) => () => { console.log('select: ' + idx) }
-
-  const update = (idx: number) => () => {
-    if (current < 0 || num <= current) { return };
-    current = idx; 
-    dispatch('slide', { next: current }); 
-  };
-</script>
