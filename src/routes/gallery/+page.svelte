@@ -21,6 +21,7 @@
   import fsDomainWarpingRot from '$lib/shaders/domain_warping_rot.glsl';
   import fsConversion from '$lib/shaders/conversion.glsl';
   import fsBool from '$lib/shaders/bool.glsl'
+  import fsDist from '$lib/shaders/dist_first.glsl'
 
   import { beforeUpdate } from 'svelte';
   import init, { GlBox } from '$lib/wasm/pkg';
@@ -28,7 +29,7 @@
   const shaders = [
     fsTest, fsPeriodic, fsPerlin, fsVgNoise, fsBrending, 
     fsFBM, fsDomainWarping, fsDomainWarpingRot, fsConversion,
-    fsBool,
+    fsBool, fsDist,
   ];
 
   const vShader = vertexShader;
