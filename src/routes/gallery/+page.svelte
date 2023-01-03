@@ -22,6 +22,7 @@
   import fsConversion from '$lib/shaders/conversion.glsl';
   import fsBool from '$lib/shaders/bool.glsl'
   import fsDist from '$lib/shaders/dist_first.glsl'
+  import fsDistImproved from '$lib/shaders/dist_first_improved.glsl'
 
   import { beforeUpdate } from 'svelte';
   import init, { GlBox } from '$lib/wasm/pkg';
@@ -29,7 +30,7 @@
   const shaders = [
     fsTest, fsPeriodic, fsPerlin, fsVgNoise, fsBrending, 
     fsFBM, fsDomainWarping, fsDomainWarpingRot, fsConversion,
-    fsBool, fsDist,
+    fsBool, fsDist, fsDistImproved,
   ];
 
   const vShader = vertexShader;

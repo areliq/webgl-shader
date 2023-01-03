@@ -4,6 +4,7 @@ precision highp int;
 out vec4 fragColor;
 uniform float u_time;
 uniform vec2 u_resolution;
+int channel;
 
 uvec3 k = uvec3(0x456789abu, 0x6789ab45u, 0x89ab4567u);
 uvec3 u = uvec3(1, 2, 3);
@@ -50,25 +51,60 @@ vec3 hash33(vec3 p){
     return vec3(uhash33(n)) / vec3(UINT_MAX);
 }
 
-float fdist(vec2 p) {
+float fdist21(vec2 p) {
     vec2 n = floor(p + 0.5);
     float dist = sqrt(2.0);
 
-    for(float j = - 2.0; j <= 2.0; j++) {
-        for(float i = - 2.0; i <= 2.0; i++) {
-            vec2 grid = n + vec2(i, j);
-            vec2 jitter = sin(u_time) * (hash22(grid) - 0.5);
+    for (float j = 0.0; j <= 2.0; j++) {
+        vec2 grid;
+        grid.y = n.y + sign(mod(j, 2.0) - 0.5) * ceil(j * 0.5);
 
-            dist = min(dist, distance(grid + jitter, p));
+        if (abs(grid.y - p.y) - 0.5 > dist) {
+            continue;
+        }
+
+        for (float i = -1.0; i <= 1.0; i++) {
+            grid.x = n.x + i;
+            vec2 jitter = hash22(grid) - 0.5;
+            dist = min(dist, length(grid + jitter - p));
         }
     }
     return dist;
 }
 
-void main() {
+float fdist31(vec3 p) {
+    vec3 n = floor(p + 0.5);
+    float dist = sqrt(3.0);
+
+    for (float k = 0.0; k <= 2.0; k++) {
+            vec3 grid;
+            grid.z = n.z + sign(mod(k, 2.0) - 0.5) * ceil(k * 0.5);
+            if (abs(grid.z - p.z) - 0.5 > dist) {
+                continue;
+            }
+
+        for (float j = 0.0; j <= 2.0; j++) {
+            grid.y = n.y + sign(mod(j, 2.0) - 0.5) * ceil(j * 0.5);
+
+            if (abs(grid.y - p.y) - 0.5 > dist) {
+                continue;
+            }
+
+            for (float i = -1.0; i <= 1.0; i++) {
+                grid.x = n.x + i;
+                vec3 jitter = hash33(grid) - 0.5;
+                dist = min(dist, length(grid + jitter - p));
+            }
+        }
+    }
+    return dist;
+}
+
+void main(){
     vec2 pos = gl_FragCoord.xy / min(u_resolution.x, u_resolution.y);
+    channel = int(2.0 * gl_FragCoord.x / u_resolution.x); 
     pos *= 10.0;
     pos += u_time;
-    fragColor = vec4(fdist(pos));
+    fragColor = channel == 0 ? vec4(fdist21(pos)) : vec4(fdist31(vec3(pos, u_time)));
     fragColor.a = 1.0;
 }
