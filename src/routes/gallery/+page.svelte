@@ -23,6 +23,8 @@
   import fsBool from '$lib/shaders/bool.glsl'
   import fsDist from '$lib/shaders/dist_first.glsl'
   import fsDistImproved from '$lib/shaders/dist_first_improved.glsl'
+  import fsDistGrad from '$lib/shaders/dist_first_grad.glsl'
+  import fsVoronoi from '$lib/shaders/voronoi.glsl'
 
   import { beforeUpdate } from 'svelte';
   import init, { GlBox } from '$lib/wasm/pkg';
@@ -46,6 +48,8 @@
     { id: 9, source: fsBool, title: "Boolean Operation", },
     { id: 10, source: fsDist, title: "First Nearest Neighbor Distance", },
     { id: 11, source: fsDistImproved, title: "First Nearest Neighbor Distance (Calc Improved)", },
+    { id: 12, source: fsDistGrad, title: "First Nearest Neighbor Distance (Grad)", },
+    { id: 13, source: fsVoronoi, title: "Voronoi Cell", },
   ];
 
   const vShader = vertexShader;
