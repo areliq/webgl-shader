@@ -25,6 +25,7 @@
   import fsDistImproved from '$lib/shaders/dist_first_improved.glsl'
   import fsDistGrad from '$lib/shaders/dist_first_grad.glsl'
   import fsVoronoi from '$lib/shaders/voronoi.glsl'
+  import fsCellular from '$lib/shaders/cellular_noise.glsl'
 
   import { beforeUpdate } from 'svelte';
   import init, { GlBox } from '$lib/wasm/pkg';
@@ -50,6 +51,7 @@
     { id: 11, source: fsDistImproved, title: "First Nearest Neighbor Distance (Calc Improved)", },
     { id: 12, source: fsDistGrad, title: "First Nearest Neighbor Distance (Grad)", },
     { id: 13, source: fsVoronoi, title: "Voronoi Cell", },
+    { id: 14, source: fsCellular, title: "Cellular Noise", },
   ];
 
   const vShader = vertexShader;

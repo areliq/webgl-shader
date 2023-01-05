@@ -4,7 +4,7 @@ precision highp int;
 out vec4 fragColor;
 uniform float u_time;
 uniform vec2 u_resolution;
-int channel;
+ivec2 channel;
 
 uvec3 k = uvec3(0x456789abu, 0x6789ab45u, 0x89ab4567u);
 uvec3 u = uvec3(1, 2, 3);
@@ -51,60 +51,76 @@ vec3 hash33(vec3 p){
     return vec3(uhash33(n)) / vec3(UINT_MAX);
 }
 
-float fdist21(vec2 p) {
-    vec2 n = floor(p + 0.5);  // grid point
-    float dist = sqrt(2.0);
+vec4 sort(vec4 list, float v) {
+    bvec4 res = bvec4(step(v, list));
+    return res.x ? vec4(v, list.xyz):
+        res.y ? vec4(list.x, v, list.yz):
+        res.z ? vec4(list.xy, v, list.z):
+        res.w ? vec4(list.xyz, v):
+        list;
+}
 
-    for (float j = 0.0; j <= 2.0; j++) {
-        vec2 grid;   // nearest grid point
+vec4 fdist24(vec2 p) {
+    vec2 n = floor(p) + 0.5;
+    vec4 dist4 = vec4(length(1.5 - abs(p - n)));
+
+    for (float j = 0.0; j <= 4.0; j++) {
+        vec2 grid;
         grid.y = n.y + sign(mod(j, 2.0) - 0.5) * ceil(j * 0.5);
-
-        if (abs(grid.y - p.y) - 0.5 > dist) {
+        if (abs(grid.y - p.y) - 0.5 > dist4.w){
             continue;
         }
-
-        for (float i = -1.0; i <= 1.0; i++) {
+        for (float i = -2.0; i <= 2.0; i++) {
             grid.x = n.x + i;
             vec2 jitter = hash22(grid) - 0.5;
-            dist = min(dist, length(grid + jitter - p));
+            dist4 = sort(dist4, length(grid + jitter - p));
         }
     }
-    return dist;
+    return dist4;
 }
 
-float fdist31(vec3 p) {
-    vec3 n = floor(p + 0.5);
-    float dist = sqrt(3.0);
-
-    for (float k = 0.0; k <= 2.0; k++) {
+vec4 fdist34(vec3 p) {
+    vec3 n = floor(p) + 0.5;
+    vec4 dist4 = vec4(length(1.5 - abs(p - n)));
+    for (float k = 0.0; k <= 4.0; k++) {
             vec3 grid;
             grid.z = n.z + sign(mod(k, 2.0) - 0.5) * ceil(k * 0.5);
-            if (abs(grid.z - p.z) - 0.5 > dist) {
+            if (abs(grid.z - p.z) - 0.5 > dist4.w) {
                 continue;
             }
-
-        for (float j = 0.0; j <= 2.0; j++) {
+        for (float j = 0.0; j <= 4.0; j++) {
             grid.y = n.y + sign(mod(j, 2.0) - 0.5) * ceil(j * 0.5);
-
-            if (abs(grid.y - p.y) - 0.5 > dist) {
+            if (abs(grid.y - p.y) - 0.5 > dist4.w) {
                 continue;
             }
-
-            for (float i = -1.0; i <= 1.0; i++) {
+            for (float i = -2.0; i <= 2.0; i++) {
                 grid.x = n.x + i;
                 vec3 jitter = hash33(grid) - 0.5;
-                dist = min(dist, length(grid + jitter - p));
+                dist4 = sort(dist4, length(grid + jitter - p));
             }
         }
     }
-    return dist;
+    return dist4;
 }
 
-void main(){
+vec4 wt;
+
+float cnoise21(vec2 p) {
+    return abs(dot(wt, fdist24(p)));
+}
+
+float cnoise31(vec3 p) {
+    return abs(dot(wt, fdist34(p)));
+}
+
+void main() {
     vec2 pos = gl_FragCoord.xy / min(u_resolution.x, u_resolution.y);
-    channel = int(2.0 * gl_FragCoord.x / u_resolution.x); 
+    channel = ivec2(vec2(3, 2) * gl_FragCoord.xy / u_resolution.xy); 
     pos *= 10.0;
     pos += u_time;
-    fragColor = channel == 0 ? vec4(fdist21(pos)) : vec4(fdist31(vec3(pos, u_time)));
+    wt = channel.x == 0 ? vec4(0.2) :
+         channel.x == 1 ? vec4(0.5, -1.0, 1.4, -0.1) :
+         vec4(-0.3, -0.5, -1.2, 1.0);
+    fragColor = vec4(channel.y == 0 ? cnoise21(pos) : cnoise31(vec3(pos, u_time)));
     fragColor.a = 1.0;
 }
