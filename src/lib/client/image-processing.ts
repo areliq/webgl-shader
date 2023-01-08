@@ -1,6 +1,6 @@
-import { initWebGL, bindBufferToLocation, initBuffer } from "$lib/client/webgl-common"
-import { mat4 } from "gl-matrix";
-import { cube } from "./cube-def";
+import { initWebGL, bindBufferToLocation, initBuffer } from '$lib/client/webgl-common';
+import { mat4 } from 'gl-matrix';
+import { cube } from './cube-def';
 
 const vs = `#version 300 es
 in vec2 a_position;
@@ -24,7 +24,7 @@ void main() {
   // Pass the texcoord to the fragment shader.
   v_texcoord = a_texcoord;
 }
-`
+`;
 
 const fs = `#version 300 es
 precision highp float;
@@ -40,52 +40,48 @@ void main() {
   // Look up a color from the texture.
   fragColor = texture(u_image, v_texcoord);
 }
-`
+`;
 
-const texCoord = [
-    0.0, 0.0, 
-    1.0, 0.0, 
-    0.0, 1.0, 
-    0.0, 1.0, 
-    1.0, 0.0, 
-    1.0, 1.0,
-]
+const texCoord = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0];
 
 export class TextureBoard {
   private ctx;
   private locations;
   private buffers;
   private canvas;
-//   private texture;
-//   private image;
+  //   private texture;
+  //   private image;
 
   constructor(id: string) {
     const webgl = initWebGL(id, vs, fs, (msg) => console.log(msg));
 
     if (webgl === null) {
-      throw new Error("failed to initialize WebGL")
+      throw new Error('failed to initialize WebGL');
     }
 
     const { ctx, canvas, program } = webgl;
 
     const locations = {
       attribute: {
-        vpos: ctx.getAttribLocation(program, "a_position"),
-        vtex: ctx.getAttribLocation(program, "a_texcoord"),
+        vpos: ctx.getAttribLocation(program, 'a_position'),
+        vtex: ctx.getAttribLocation(program, 'a_texcoord')
       },
       uniform: {
-        resolution: ctx.getUniformLocation(program, "u_resolution"),
-        sampler: ctx.getUniformLocation(program, "u_image"),
+        resolution: ctx.getUniformLocation(program, 'u_resolution'),
+        sampler: ctx.getUniformLocation(program, 'u_image')
       }
-    }
+    };
 
-    
     const buffers = {
-      position: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(rect(0, 0, canvas.width, canvas.height))),
+      position: initBuffer(
+        ctx,
+        ctx.ARRAY_BUFFER,
+        new Float32Array(rect(0, 0, canvas.width, canvas.height))
+      ),
       // colors: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(colors)),
       // indices: initBuffer(ctx, ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices)),
-      texture: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(texCoord)),
-    }
+      texture: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(texCoord))
+    };
 
     // init with temporary texture
     const texture = initTexture(ctx);
@@ -112,7 +108,7 @@ export class TextureBoard {
     // const srcFormat = ctx.RGBA;
     // const srcType = ctx.UNSIGNED_BYTE;
     // ctx.texImage2D(ctx.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image);
-    
+
     this.ctx = ctx;
     this.canvas = canvas;
     this.locations = locations;
@@ -166,7 +162,7 @@ export class TextureBoard {
 
     bindBufferToLocation(ctx, 2, this.locations.attribute.vpos, this.buffers.position);
     bindBufferToLocation(ctx, 2, this.locations.attribute.vtex, this.buffers.texture);
-  
+
     {
       const vertexCount = 6;
       const type = ctx.TRIANGLES;
@@ -174,38 +170,41 @@ export class TextureBoard {
       ctx.drawArrays(type, offset, vertexCount);
     }
   }
-
 }
 
 const initTexture = (ctx: WebGL2RenderingContext) => {
-    const texture = ctx.createTexture();
-    ctx.bindTexture(ctx.TEXTURE_2D, texture);
-  
-    const level = 0;
-    const internalFormat = ctx.RGBA;
-    const width = 1;
-    const height = 1;
-    const border = 0;
-    const srcFormat = ctx.RGBA;
-    const srcType = ctx.UNSIGNED_BYTE;
-    const pixel = new Uint8Array([0, 0, 255, 255]);  // temporary color
-  
-    ctx.texImage2D(
-      ctx.TEXTURE_2D, level, internalFormat, width, 
-      height, border, srcFormat, srcType, pixel
-    );
-  
-    return texture;
-}
+  const texture = ctx.createTexture();
+  ctx.bindTexture(ctx.TEXTURE_2D, texture);
+
+  const level = 0;
+  const internalFormat = ctx.RGBA;
+  const width = 1;
+  const height = 1;
+  const border = 0;
+  const srcFormat = ctx.RGBA;
+  const srcType = ctx.UNSIGNED_BYTE;
+  const pixel = new Uint8Array([0, 0, 255, 255]); // temporary color
+
+  ctx.texImage2D(
+    ctx.TEXTURE_2D,
+    level,
+    internalFormat,
+    width,
+    height,
+    border,
+    srcFormat,
+    srcType,
+    pixel
+  );
+
+  return texture;
+};
 
 const rect = (x: number, y: number, w: number, h: number) => {
-    const x0 = x;
-    const x1 = x + w;
-    const y0 = y;
-    const y1 = y + h;
+  const x0 = x;
+  const x1 = x + w;
+  const y0 = y;
+  const y1 = y + h;
 
-    return [
-        x0, y0, x1, y0, x0, y1,
-        x0, y1, x1, y0, x1, y1,
-    ]
-}
+  return [x0, y0, x1, y0, x0, y1, x0, y1, x1, y0, x1, y1];
+};

@@ -1,6 +1,6 @@
-import { initWebGL, bindBufferToLocation } from "$lib/client/webgl-common"
-import { mat4 } from "gl-matrix";
-import { cube } from "./cube-def";
+import { initWebGL, bindBufferToLocation } from '$lib/client/webgl-common';
+import { mat4 } from 'gl-matrix';
+import { cube } from './cube-def';
 
 const vsTexture = `#version 300 es
 in vec4 a_position;
@@ -25,7 +25,7 @@ void main() {
   // pass attribute color
   v_color = a_color;
 }
-`
+`;
 
 const fsTexture = `#version 300 es
 precision highp float;
@@ -43,7 +43,7 @@ out vec4 fragColor;
 void main() {
   fragColor = texture(u_texture, v_texcoord) * v_color;
 }
-`
+`;
 
 const vsColor = `#version 300 es
 in vec4 aVertexPosition;
@@ -58,7 +58,7 @@ void main() {
   gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
   vColor = aVertexColor;
 }
-`
+`;
 
 const fsColor = `#version 300 es
 precision highp float;
@@ -69,7 +69,7 @@ out vec4 fragColor;
 void main() {
   fragColor = vColor;
 }
-`
+`;
 
 // const assert = <T>(obj: T | null, name = "obj"): obj is T => {
 //     if (obj === null) {
@@ -87,12 +87,12 @@ export class TextureCube {
   // private texture;
   private delta = 0.0;
   private cube = cube();
-  
+
   constructor(id: string) {
     const webgl = initWebGL(id, vsTexture, fsTexture, (msg) => console.log(msg));
 
     if (webgl === null) {
-      throw new Error("failed to initialize WebGL")
+      throw new Error('failed to initialize WebGL');
     }
 
     const { ctx, canvas, program } = webgl;
@@ -104,31 +104,31 @@ export class TextureCube {
 
     const locations = {
       attribute: {
-        vpos: ctx.getAttribLocation(program, "a_position"),
-        vtex: ctx.getAttribLocation(program, "a_texcoord"),
-        vcol: ctx.getAttribLocation(program, "a_color"),
+        vpos: ctx.getAttribLocation(program, 'a_position'),
+        vtex: ctx.getAttribLocation(program, 'a_texcoord'),
+        vcol: ctx.getAttribLocation(program, 'a_color')
         // vp: ctx.getAttribLocation(program, "aVertexPosition"),
         // vc: ctx.getAttribLocation(program, "aVertexColor"),
       },
       uniform: {
-        pjm: ctx.getUniformLocation(program, "u_projection_matrix"),
-        mvm: ctx.getUniformLocation(program, "u_model_view_matrix"),
-        sampler: ctx.getUniformLocation(program, "u_texture"),
+        pjm: ctx.getUniformLocation(program, 'u_projection_matrix'),
+        mvm: ctx.getUniformLocation(program, 'u_model_view_matrix'),
+        sampler: ctx.getUniformLocation(program, 'u_texture')
         // mvm: ctx.getUniformLocation(program, "uModelViewMatrix"),
         // pjm: ctx.getUniformLocation(program, "uProjectionMatrix"),
       }
-    }
+    };
 
     const { positions, colors, indices, texcoord } = this.cube;
 
     // console.log(this.cube)
-    
+
     const buffers = {
       position: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(positions)),
       colors: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(colors)),
       texture: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(texcoord)),
-      indices: initBuffer(ctx, ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices)),
-    }
+      indices: initBuffer(ctx, ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices))
+    };
 
     const texture = initTexture(ctx);
 
@@ -147,7 +147,7 @@ export class TextureCube {
 
     // Flip image pixels into the bottom-to-top order that WebGL expects.
     ctx.pixelStorei(ctx.UNPACK_FLIP_Y_WEBGL, true);
-    
+
     this.ctx = ctx;
     this.canvas = canvas;
     this.locations = locations;
@@ -188,9 +188,9 @@ export class TextureCube {
     const srcType = ctx.UNSIGNED_BYTE;
     // ctx.bindTexture(ctx.TEXTURE_2D, this.texture);
     ctx.texImage2D(ctx.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image);
-    console.log("image load to texture")
+    console.log('image load to texture');
   }
-  
+
   draw() {
     this.resize();
 
@@ -212,33 +212,33 @@ export class TextureCube {
 
     // ctx.activeTexture(ctx.TEXTURE0);
     // ctx.bindTexture(ctx.TEXTURE_2D, this.texture);
-  
+
     // // bind the texture to unit 0
-    // ctx.uniform1i(this.locations.uniform.sampler, 0); 
+    // ctx.uniform1i(this.locations.uniform.sampler, 0);
 
     const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
     const m = matrices(aspect, this.delta);
 
     ctx.uniformMatrix4fv(this.locations.uniform.pjm, false, m.projectionMatrix);
     ctx.uniformMatrix4fv(this.locations.uniform.mvm, false, m.modelViewMatrix);
-  
+
     {
       const vertexCount = this.cube.indices.length;
       const dataType = ctx.UNSIGNED_SHORT;
       const offset = 0;
       // const instanceCount = 1;
-      this.ctx.drawElements(ctx.TRIANGLES, vertexCount, dataType, offset);  // ctx.LINES
+      this.ctx.drawElements(ctx.TRIANGLES, vertexCount, dataType, offset); // ctx.LINES
     }
   }
 }
 
-const initBuffer = (ctx: WebGL2RenderingContext, target: number, data: BufferSource | null) => {  
+const initBuffer = (ctx: WebGL2RenderingContext, target: number, data: BufferSource | null) => {
   const buf = ctx.createBuffer();
   ctx.bindBuffer(target, buf);
   ctx.bufferData(target, data, ctx.STATIC_DRAW);
-  
+
   return buf;
-}
+};
 
 const matrices = (aspect: number, rot: number) => {
   const fov = (45 * Math.PI) / 180; // field of view in radians
@@ -250,14 +250,15 @@ const matrices = (aspect: number, rot: number) => {
 
   const modelViewMatrix = mat4.create();
   mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -6.0]);
-  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 1.0, [0, 0, 1]);  // around Z-axis
-  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 0.7, [0, 1, 0]);  // around Y-axis
-  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 0.3, [1, 0, 0]);  // around X-axis
+  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 1.0, [0, 0, 1]); // around Z-axis
+  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 0.7, [0, 1, 0]); // around Y-axis
+  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 0.3, [1, 0, 0]); // around X-axis
 
   return {
-    projectionMatrix, modelViewMatrix,
-  }
-}
+    projectionMatrix,
+    modelViewMatrix
+  };
+};
 
 const initTexture = (ctx: WebGL2RenderingContext) => {
   const texture = ctx.createTexture();
@@ -270,12 +271,19 @@ const initTexture = (ctx: WebGL2RenderingContext) => {
   const border = 0;
   const srcFormat = ctx.RGBA;
   const srcType = ctx.UNSIGNED_BYTE;
-  const pixel = new Uint8Array([0, 0, 255, 255]);  // blue: temporary color
+  const pixel = new Uint8Array([0, 0, 255, 255]); // blue: temporary color
 
   ctx.texImage2D(
-    ctx.TEXTURE_2D, level, internalFormat, width, 
-    height, border, srcFormat, srcType, pixel
+    ctx.TEXTURE_2D,
+    level,
+    internalFormat,
+    width,
+    height,
+    border,
+    srcFormat,
+    srcType,
+    pixel
   );
 
   return texture;
-}
+};

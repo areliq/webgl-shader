@@ -1,4 +1,4 @@
-import { initWebGL, bindBufferToLocation } from "$lib/client/webgl-common"
+import { initWebGL, bindBufferToLocation } from '$lib/client/webgl-common';
 
 const vertexShaderSource = `#version 300 es
 // The individual position vertex
@@ -9,7 +9,7 @@ void main() {
     // after the vertex shader modifies it
     gl_Position = vec4(position, 0.0, 1.0);
 }
-`
+`;
 
 const fragmentShaderSource = `#version 300 es
 precision highp float;
@@ -25,37 +25,39 @@ void main() {
 
     fragColor = vec4(abs(sin(u_time)), pos, 1.0);
 }
-`
+`;
 
 export class Whiteboard {
   private ctx;
   private locations;
   private buffers;
   private canvas;
-  
+
   constructor(id: string) {
-    const webgl = initWebGL(id, vertexShaderSource, fragmentShaderSource, (msg) => console.log(msg));
+    const webgl = initWebGL(id, vertexShaderSource, fragmentShaderSource, (msg) =>
+      console.log(msg)
+    );
 
     if (webgl === null) {
-      throw new Error("failed to initialize WebGL")
+      throw new Error('failed to initialize WebGL');
     }
 
     const { ctx, canvas, program } = webgl;
 
     const locations = {
       attribute: {
-        vertexPosition: ctx.getAttribLocation(program, "position"),
+        vertexPosition: ctx.getAttribLocation(program, 'position')
       },
       uniform: {
-          time: ctx.getUniformLocation(program, "u_time"),
-          resolution: ctx.getUniformLocation(program, "u_resolution"),
-        }
+        time: ctx.getUniformLocation(program, 'u_time'),
+        resolution: ctx.getUniformLocation(program, 'u_resolution')
       }
-    
+    };
+
     const buffers = {
       position: initPositionBuffer(ctx)
-    }
-    
+    };
+
     this.ctx = ctx;
     this.canvas = canvas;
     this.locations = locations;
@@ -85,12 +87,17 @@ export class Whiteboard {
 
     this.ctx.viewport(0, 0, displayWidth, displayHeight);
   }
-  
+
   draw() {
     this.resize();
 
-    bindBufferToLocation(this.ctx, 2, this.locations.attribute.vertexPosition, this.buffers.position);
-  
+    bindBufferToLocation(
+      this.ctx,
+      2,
+      this.locations.attribute.vertexPosition,
+      this.buffers.position
+    );
+
     {
       const vertexCount = 6;
       const type = this.ctx.TRIANGLES;
@@ -102,21 +109,27 @@ export class Whiteboard {
 
 const initPositionBuffer = (ctx: WebGL2RenderingContext) => {
   const triangle1 = [
-    -1.0, -1.0,  // left-bottom
-    1.0, -1.0,  // right-bottom
-    -1.0, 1.0,  // left-top
-  ]
+    -1.0,
+    -1.0, // left-bottom
+    1.0,
+    -1.0, // right-bottom
+    -1.0,
+    1.0 // left-top
+  ];
   const triangle2 = [
-    -1.0, 1.0,  // left-top
-    1.0, -1.0,  // right-bottom
-    1.0, 1.0,  // right-top
-  ]
-  
+    -1.0,
+    1.0, // left-top
+    1.0,
+    -1.0, // right-bottom
+    1.0,
+    1.0 // right-top
+  ];
+
   const positions = [...triangle1, ...triangle2];
-  
+
   const positionBuffer = ctx.createBuffer();
   ctx.bindBuffer(ctx.ARRAY_BUFFER, positionBuffer);
   ctx.bufferData(ctx.ARRAY_BUFFER, new Float32Array(positions), ctx.STATIC_DRAW);
-  
+
   return positionBuffer;
-}
+};

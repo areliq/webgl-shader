@@ -1,6 +1,6 @@
-import { initWebGL, bindBufferToLocation } from "$lib/client/webgl-common"
-import { mat4 } from "gl-matrix";
-import { cube } from "./cube-def";
+import { initWebGL, bindBufferToLocation } from '$lib/client/webgl-common';
+import { mat4 } from 'gl-matrix';
+import { cube } from './cube-def';
 
 const vs = `#version 300 es
 in vec4 aVertexPosition;
@@ -15,7 +15,7 @@ void main() {
   gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
   vColor = aVertexColor;
 }
-`
+`;
 
 const fs = `#version 300 es
 precision mediump float;
@@ -26,7 +26,7 @@ out vec4 fragColor;
 void main() {
   fragColor = vColor;
 }
-`
+`;
 
 export class RotatingCube {
   private ctx;
@@ -35,35 +35,35 @@ export class RotatingCube {
   private canvas;
   private delta = 0.0;
   private cube = cube();
-  
+
   constructor(id: string) {
     const webgl = initWebGL(id, vs, fs, (msg) => console.log(msg));
 
     if (webgl === null) {
-      throw new Error("failed to initialize WebGL")
+      throw new Error('failed to initialize WebGL');
     }
 
     const { ctx, canvas, program } = webgl;
 
     const locations = {
       attribute: {
-        vp: ctx.getAttribLocation(program, "aVertexPosition"),
-        vc: ctx.getAttribLocation(program, "aVertexColor"),
+        vp: ctx.getAttribLocation(program, 'aVertexPosition'),
+        vc: ctx.getAttribLocation(program, 'aVertexColor')
       },
       uniform: {
-        mvm: ctx.getUniformLocation(program, "uModelViewMatrix"),
-        pjm: ctx.getUniformLocation(program, "uProjectionMatrix"),
+        mvm: ctx.getUniformLocation(program, 'uModelViewMatrix'),
+        pjm: ctx.getUniformLocation(program, 'uProjectionMatrix')
       }
-    }
+    };
 
     const { positions, colors, indices } = this.cube;
-    
+
     const buffers = {
       position: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(positions)),
       colors: initBuffer(ctx, ctx.ARRAY_BUFFER, new Float32Array(colors)),
-      indices: initBuffer(ctx, ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices)),
-    }
-    
+      indices: initBuffer(ctx, ctx.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices))
+    };
+
     this.ctx = ctx;
     this.canvas = canvas;
     this.locations = locations;
@@ -94,7 +94,7 @@ export class RotatingCube {
 
     this.ctx.viewport(0, 0, displayWidth, displayHeight);
   }
-  
+
   draw() {
     this.resize();
 
@@ -116,7 +116,7 @@ export class RotatingCube {
 
     ctx.uniformMatrix4fv(this.locations.uniform.pjm, false, m.projectionMatrix);
     ctx.uniformMatrix4fv(this.locations.uniform.mvm, false, m.modelViewMatrix);
-  
+
     {
       const vertexCount = this.cube.indices.length;
       const dataType = ctx.UNSIGNED_SHORT;
@@ -127,13 +127,13 @@ export class RotatingCube {
   }
 }
 
-const initBuffer = (ctx: WebGL2RenderingContext, target: number, data: BufferSource | null) => {  
+const initBuffer = (ctx: WebGL2RenderingContext, target: number, data: BufferSource | null) => {
   const buf = ctx.createBuffer();
   ctx.bindBuffer(target, buf);
   ctx.bufferData(target, data, ctx.STATIC_DRAW);
-  
+
   return buf;
-}
+};
 
 const matrices = (aspect: number, rot: number) => {
   const fov = (45 * Math.PI) / 180; // field of view in radians
@@ -145,11 +145,12 @@ const matrices = (aspect: number, rot: number) => {
 
   const modelViewMatrix = mat4.create();
   mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -6.0]);
-  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 1.0, [0, 0, 1]);  // around Z-axis
-  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 0.7, [0, 1, 0]);  // around Y-axis
-  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 0.3, [1, 0, 0]);  // around X-axis
+  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 1.0, [0, 0, 1]); // around Z-axis
+  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 0.7, [0, 1, 0]); // around Y-axis
+  mat4.rotate(modelViewMatrix, modelViewMatrix, rot * 0.3, [1, 0, 0]); // around X-axis
 
   return {
-    projectionMatrix, modelViewMatrix,
-  }
-}
+    projectionMatrix,
+    modelViewMatrix
+  };
+};

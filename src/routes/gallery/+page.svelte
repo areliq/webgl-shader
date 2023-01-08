@@ -20,43 +20,43 @@
   import fsDomainWarping from '$lib/shaders/domain_warping.glsl';
   import fsDomainWarpingRot from '$lib/shaders/domain_warping_rot.glsl';
   import fsConversion from '$lib/shaders/conversion.glsl';
-  import fsBool from '$lib/shaders/bool.glsl'
-  import fsDist from '$lib/shaders/dist_first.glsl'
-  import fsDistImproved from '$lib/shaders/dist_first_improved.glsl'
-  import fsDistGrad from '$lib/shaders/dist_first_grad.glsl'
-  import fsVoronoi from '$lib/shaders/voronoi.glsl'
-  import fsCellular from '$lib/shaders/cellular_noise.glsl'
+  import fsBool from '$lib/shaders/bool.glsl';
+  import fsDist from '$lib/shaders/dist_first.glsl';
+  import fsDistImproved from '$lib/shaders/dist_first_improved.glsl';
+  import fsDistGrad from '$lib/shaders/dist_first_grad.glsl';
+  import fsVoronoi from '$lib/shaders/voronoi.glsl';
+  import fsCellular from '$lib/shaders/cellular_noise.glsl';
 
   import { beforeUpdate } from 'svelte';
   import init, { GlBox } from '$lib/wasm/pkg';
 
   // const shaders = [
-  //   fsTest, fsPeriodic, fsPerlin, fsVgNoise, fsBrending, 
+  //   fsTest, fsPeriodic, fsPerlin, fsVgNoise, fsBrending,
   //   fsFBM, fsDomainWarping, fsDomainWarpingRot, fsConversion,
   //   fsBool, fsDist, fsDistImproved,
   // ];
 
   const shaders = [
-    { id: 0, source: fsTest, title: "Test", },
-    { id: 1, source: fsVgNoise, title: "Value/Gradient Noise", },
-    { id: 2, source: fsPerlin, title: "Perlin Noise", },
-    { id: 3, source: fsPeriodic, title: "Perlin Noise (Periodic)", },
-    { id: 4, source: fsFBM, title: "Fractional Brownian Motion", },
-    { id: 5, source: fsDomainWarping, title: "Domain Warping", },
-    { id: 6, source: fsDomainWarpingRot, title: "Domain Warping (+Rot)", },
-    { id: 7, source: fsConversion, title: "Gradation Conversion", },
-    { id: 8, source: fsBrending, title: "Image Brending", },
-    { id: 9, source: fsBool, title: "Boolean Operation", },
-    { id: 10, source: fsDist, title: "First Nearest Neighbor Distance", },
-    { id: 11, source: fsDistImproved, title: "First Nearest Neighbor Distance (Calc Improved)", },
-    { id: 12, source: fsDistGrad, title: "First Nearest Neighbor Distance (Grad)", },
-    { id: 13, source: fsVoronoi, title: "Voronoi Cell", },
-    { id: 14, source: fsCellular, title: "Cellular Noise", },
+    { id: 0, source: fsTest, title: 'Test' },
+    { id: 1, source: fsVgNoise, title: 'Value/Gradient Noise' },
+    { id: 2, source: fsPerlin, title: 'Perlin Noise' },
+    { id: 3, source: fsPeriodic, title: 'Perlin Noise (Periodic)' },
+    { id: 4, source: fsFBM, title: 'Fractional Brownian Motion' },
+    { id: 5, source: fsDomainWarping, title: 'Domain Warping' },
+    { id: 6, source: fsDomainWarpingRot, title: 'Domain Warping (+Rot)' },
+    { id: 7, source: fsConversion, title: 'Gradation Conversion' },
+    { id: 8, source: fsBrending, title: 'Image Brending' },
+    { id: 9, source: fsBool, title: 'Boolean Operation' },
+    { id: 10, source: fsDist, title: 'First Nearest Neighbor Distance' },
+    { id: 11, source: fsDistImproved, title: 'First Nearest Neighbor Distance (Calc Improved)' },
+    { id: 12, source: fsDistGrad, title: 'First Nearest Neighbor Distance (Grad)' },
+    { id: 13, source: fsVoronoi, title: 'Voronoi Cell' },
+    { id: 14, source: fsCellular, title: 'Cellular Noise' }
   ];
 
   const vShader = vertexShader;
   // let current = 0;
-  let current = shaders[0]
+  let current = shaders[0];
   // let fShader = current.source;
   let dynamic = true;
 
@@ -90,11 +90,11 @@
     <fieldset class="menu">
       <legend class="legend"><b>Shaders</b></legend>
       {#each shaders as shader}
-      {@const optionID = `shader-${shader.id}`}
-      <div class="option">
-        <input type="radio" id={optionID} bind:group={current} name="shaders" value={shader} />
-        <label for={optionID}>{shader.title}</label>
-      </div>
+        {@const optionID = `shader-${shader.id}`}
+        <div class="option">
+          <input type="radio" id={optionID} bind:group={current} name="shaders" value={shader} />
+          <label for={optionID}>{shader.title}</label>
+        </div>
       {/each}
     </fieldset>
   </div>
@@ -114,10 +114,10 @@
     margin: 8px;
   }
   .menu {
-    background-color: #F8F8F8;
+    background-color: #f8f8f8;
   }
   .legend {
-    background-color: #F8F8F8;
+    background-color: #f8f8f8;
     border: 1.6px solid #666;
     padding: 4px 8px;
   }
